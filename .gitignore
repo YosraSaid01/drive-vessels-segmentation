@@ -1,0 +1,21 @@
+# Ignore dataset and preprocessed images
+data/
+*.zip
+*.tif
+*.gif
+*.png
+
+# Ignore system files
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.vscode/
+.idea/
+
+# Ignore notebooks checkpoints
+.ipynb_checkpoints/
+
+# Ignore large output files or logs
+results/
+logs/
