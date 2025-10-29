@@ -1,6 +1,6 @@
 # Training parameters
-epochs: 50
-batch_size: 2
+epochs: 100
+batch_size: 1
 learning_rate: 1e-4
 
 # Dataset paths
