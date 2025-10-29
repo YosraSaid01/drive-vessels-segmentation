@@ -1,13 +1,12 @@
-
-
-
 r"""
-Preprocess DRIVE training and test images for retinal vessel segmentation.
+Preprocess DRIVE training, validation, and test images for retinal vessel segmentation.
+
 This script:
 1. Loads DRIVE training images (21–40) and splits them into 80% train / 20% val.
-2. Loads DRIVE test images (1–20) — without manual vessel annotations.
+2. Loads DRIVE test images (1–20) — now including vessel masks.
 3. Converts all images to RGB, normalizes to [0, 1], resizes to 512×512,
    applies FOV masks, and saves preprocessed PNGs.
+
 Output structure:
 C:\Users\yosra\projects\data\preprocessed_data\
     ├── train\
@@ -17,7 +16,8 @@ C:\Users\yosra\projects\data\preprocessed_data\
     │    ├── images\
     │    └── masks\
     └── test\
-         └── images\
+         ├── images\
+         └── masks\
 """
 
 import os
@@ -29,8 +29,9 @@ import random
 
 def load_image_and_masks(base_dir, idx, split="training", load_mask=True):
     """Load an image, optional vessel mask, and FOV mask."""
-    img_path = os.path.join(base_dir, "images", f"{idx:02d}_{split}.tif")
-    fov_path = os.path.join(base_dir, "mask", f"{idx:02d}_{split}_mask.gif")
+    split_name = "training" if split in ["training", "validation"] else split
+    img_path = os.path.join(base_dir, "images", f"{idx:02d}_{split_name}.tif")
+    fov_path = os.path.join(base_dir, "mask", f"{idx:02d}_{split_name}_mask.gif")
 
     image = cv2.imread(img_path)
     if image is None:
@@ -79,15 +80,22 @@ def save_preprocessed(image, mask, output_dir, idx, save_mask=True):
 
 def preprocess_and_save(indices, base_dir, output_dir, split_name, load_mask=True, target_size=(512, 512)):
     """Preprocess and save all images for a given split."""
-    print(f"🔹 Preprocessing {split_name} set...")
-    for idx in tqdm(indices, desc=f"{split_name}"):
+
+    for idx in tqdm(indices, desc=f"{split_name}", leave=True):
         try:
-            image_rgb, vessel_mask, fov_mask = load_image_and_masks(base_dir, idx, split=split_name, load_mask=load_mask)
-            image_processed, mask_processed = preprocess_image(image_rgb, vessel_mask, fov_mask, target_size)
-            save_preprocessed(image_processed, mask_processed, output_dir, idx, save_mask=load_mask)
+            image_rgb, vessel_mask, fov_mask = load_image_and_masks(
+                base_dir, idx, split=split_name, load_mask=load_mask
+            )
+            image_processed, mask_processed = preprocess_image(
+                image_rgb, vessel_mask, fov_mask, target_size
+            )
+            save_preprocessed(
+                image_processed, mask_processed, output_dir, idx, save_mask=load_mask
+            )
         except Exception as e:
             print(f"❌ Error processing image {idx:02d}: {e}")
             continue
+
 
 
 def main():
@@ -108,8 +116,8 @@ def main():
 
     # Process train, val, and test sets
     preprocess_and_save(train_indices, base_train_dir, os.path.join(output_root, "train"), "training", load_mask=True, target_size=target_size)
-    preprocess_and_save(val_indices, base_train_dir, os.path.join(output_root, "val"), "training", load_mask=True, target_size=target_size)
-    preprocess_and_save(range(1, 21), base_test_dir, os.path.join(output_root, "test"), "test", load_mask=False, target_size=target_size)
+    preprocess_and_save(val_indices, base_train_dir, os.path.join(output_root, "val"), "validation", load_mask=True, target_size=target_size)
+    preprocess_and_save(range(1, 21), base_test_dir, os.path.join(output_root, "test"), "test", load_mask=True, target_size=target_size)
 
     print(f"\n✅ All preprocessed data saved in: {output_root}")
 
