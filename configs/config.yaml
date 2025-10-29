@@ -1,0 +1,21 @@
+# Training parameters
+epochs: 50
+batch_size: 2
+learning_rate: 1e-4
+
+# Dataset paths
+data_dir: data/preprocessed_data
+train_images: data/preprocessed_data/train/images
+train_masks: data/preprocessed_data/train/masks
+val_images: data/preprocessed_data/val/images
+val_masks: data/preprocessed_data/val/masks
+
+# Model parameters
+n_channels: 3
+n_classes: 1
+bilinear: true
+
+# Misc
+num_workers: 2
+device: "cuda"
+save_dir: outputs/checkpoints
