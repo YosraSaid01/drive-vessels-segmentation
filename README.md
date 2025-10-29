@@ -4,24 +4,33 @@
 **Author:** Yosra Said  
 
 ---
-
 ## 🌍 Project Overview  
 
 This project focuses on **automatic segmentation of retinal blood vessels** from fundus images using **deep learning**.  
 Segmenting retinal vessels plays a crucial role in early diagnosis of diseases such as **diabetic retinopathy**, **glaucoma**, and **hypertension**.  
 
-**The goal is to:**  
-1. Preprocess the raw DRIVE dataset images to standardize illumination and size.  
+**The goals are to:**  
+1. Preprocess the raw **DRIVE** and **CHASE_DB1** datasets to standardize illumination and size.  
 2. Train a deep learning model (such as **U-Net** or **DeepLabV3+**) for binary vessel segmentation.  
-3. Evaluate model performance using metrics such as **Dice coefficient**, **IoU**, **Sensitivity**, and **Specificity**.  
+3. **Evaluate model performance both within and across datasets** to study cross-dataset generalization.  
 
-This repository includes preprocessing, data management, and will later include model training and evaluation scripts.  
+Specifically, the model will be trained and tested under four configurations to assess **cross-correlation** between the two datasets:  
+- 🧠 **Train on DRIVE → Test on DRIVE** (baseline performance)  
+- 🧠 **Train on CHASE_DB1 → Test on CHASE_DB1** (baseline performance)  
+- 🔄 **Train on DRIVE → Test on CHASE_DB1** (cross-dataset generalization)  
+- 🔄 **Train on CHASE_DB1 → Test on DRIVE** (cross-dataset generalization)  
+
+Evaluation metrics include the **Dice coefficient**, **Intersection over Union (IoU)**, **Sensitivity**, and **Specificity**.  
+
+This repository includes preprocessing, data management, and will later include full model training and evaluation scripts for these experiments.  
 
 ---
 
-## 📊 Dataset Description — DRIVE  
+## 📊 Dataset Description  
 
-The **DRIVE (Digital Retinal Images for Vessel Extraction)** dataset is a publicly available benchmark for retinal vessel segmentation.  
+### 🩺 DRIVE — *Digital Retinal Images for Vessel Extraction*  
+
+The **DRIVE** dataset is a standard benchmark for retinal vessel segmentation.  
 
 | Property | Description |
 |-----------|-------------|
@@ -31,12 +40,26 @@ The **DRIVE (Digital Retinal Images for Vessel Extraction)** dataset is a public
 | **Task** | Binary segmentation: vessel (1) vs. background (0) |
 | **Source** | [DRIVE Challenge Dataset](https://drive.grand-challenge.org/) |
 
-**The dataset includes:**  
+**Structure:**  
 - `images/` — RGB fundus images  
 - `1st_manual/` — ground truth vessel masks  
-- `mask/` — field-of-view (FOV) masks defining the retinal region  
+- `mask/` — field-of-view (FOV) masks  
 
 Each image is accompanied by a binary mask highlighting blood vessels within the FOV.  
+
+---
+
+### 🧬 CHASE_DB1 — *Child Heart and Health Study in England*  
+
+The **CHASE_DB1** dataset contains high-resolution fundus images with manually annotated vessel segmentations by two observers.  
+
+| Property | Description |
+|-----------|-------------|
+| **Images** | 28 color fundus photographs (14 subjects × 2 eyes) |
+| **Resolution** | 999 × 960 pixels |
+| **Annotations** | Two manual vessel annotations per image |
+| **Task** | Binary segmentation: vessel (1) vs. background (0) |
+| **Source** | [CHASE_DB1 Dataset – University of Kingston](https://blogs.kingston.ac.uk/retinal/chasedb1/) |
 
 ---
 
@@ -63,12 +86,25 @@ The next stage of this project will implement a **U-Net-based segmentation model
 - **Output:** binary vessel segmentation masks  
 - **Loss functions:** Dice Loss, Binary Cross-Entropy  
 - **Optimizer:** Adam  
-- **Evaluation:** Dice, IoU, Sensitivity, Specificity  
+- **Evaluation metrics:** Dice, IoU, Sensitivity, Specificity  
 
-**Future versions may explore:**  
+**Future extensions will include:**  
 - Transfer learning with pre-trained encoders (e.g. ResNet-based U-Net)  
 - Confidence maps for uncertainty quantification  
 - Model explainability using Grad-CAM  
+- **Cross-dataset analysis** to quantify the generalization gap between DRIVE and CHASE_DB1 and understand inter-dataset correlations.  
+
+---
+
+## 🧪 Planned Experiments  
+
+| Experiment | Train Dataset | Test Dataset | Purpose |
+|-------------|----------------|---------------|----------|
+| **E1** | DRIVE | DRIVE | Baseline performance on DRIVE |
+| **E2** | CHASE_DB1 | CHASE_DB1 | Baseline performance on CHASE_DB1 |
+| **E3** | DRIVE | CHASE_DB1 | Test generalization from DRIVE → CHASE |
+| **E4** | CHASE_DB1 | DRIVE | Test generalization from CHASE → DRIVE |
+
 
 ---
 
