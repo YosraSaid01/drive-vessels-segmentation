@@ -37,12 +37,12 @@ class RetinalDataset(Dataset):
 
         # Data augmentations for training
         self.train_transform = A.Compose([
-            A.HorizontalFlip(p=0.7),
-            A.VerticalFlip(p=0.7),
-            A.RandomRotate90(p=0.7),
-            A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.15, rotate_limit=45, p=0.7),
+            A.HorizontalFlip(p=1),
+            A.VerticalFlip(p=0.1),
+            A.RandomRotate90(p=1),
+            A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.15, rotate_limit=45, p=1),
             A.ElasticTransform(alpha=80, sigma=10, alpha_affine=20, p=0.4),
-            A.RandomBrightnessContrast(p=0.6),
+            A.RandomBrightnessContrast(p=1),
             A.GaussianBlur(p=0.3),
             A.GaussNoise(var_limit=(5.0, 25.0), p=0.4),
             A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
