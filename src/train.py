@@ -17,9 +17,9 @@ import torch.nn as nn
 import yaml
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from dataset import RetinalDataset
-from model.unet import UNet
-from utils.metrics import dice_coefficient, iou_score
+from src.dataset import RetinalDataset
+from src.model.unet_model import UNet
+from src.utils.metrics import dice_coefficient, iou_score
 
 # -----------------------------
 # 1. Load Configuration
