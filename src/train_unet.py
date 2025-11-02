@@ -1,5 +1,5 @@
 """
-train.py — Training script for retinal vessel segmentation using U-Net.
+train_unet.py — Training script for retinal vessel segmentation using U-Net.
 
 This script:
 1. Loads parameters and paths from configs/config.yaml.
@@ -18,8 +18,11 @@ import yaml
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from src.dataset import RetinalDataset
-from src.model.unet_model import UNet
+#from src.model.unet_model import UNet
+from backbones_unet.model.unet import Unet
 from src.utils.metrics import dice_coefficient, iou_score
+import datetime
+from src.utils.losses import BCEDiceLoss
 
 
 def main():
@@ -34,8 +37,12 @@ def main():
     TRAIN_MASK_DIR = cfg["train_masks"]
     VAL_IMG_DIR = cfg["val_images"]
     VAL_MASK_DIR = cfg["val_masks"]
-    CHECKPOINT_DIR = cfg["save_dir"]
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    BASE_CHECKPOINT_DIR = cfg["save_dir"]
+    CHECKPOINT_DIR = os.path.join(BASE_CHECKPOINT_DIR, timestamp)
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+
+    print(f"📁 Saving checkpoints in: {CHECKPOINT_DIR}")
 
     EPOCHS = int(cfg["epochs"])
     BATCH_SIZE = int(cfg["batch_size"])
@@ -62,9 +69,18 @@ def main():
     # -----------------------------
     # 3. Model, Loss, Optimizer
     # -----------------------------
-    model = UNet(n_channels=N_CHANNELS, n_classes=N_CLASSES, bilinear=BILINEAR).to(DEVICE)
+    #model = UNet(n_channels=N_CHANNELS, n_classes=N_CLASSES, bilinear=BILINEAR).to(DEVICE)
+    model = Unet(
+        backbone="resnet50",
+        pretrained=True,  # loads ImageNet weights for encoder
+        in_channels=N_CHANNELS,
+        num_classes=N_CLASSES,
+        activation=None
+    ).to(DEVICE)
+
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    bce_loss = nn.BCEWithLogitsLoss()
+    criterion = BCEDiceLoss(alpha=0.5)
+
 
     # -----------------------------
     # 4. Training Loop
@@ -82,7 +98,8 @@ def main():
 
             optimizer.zero_grad()
             outputs = model(images)
-            loss = bce_loss(outputs, masks)
+            loss = criterion(outputs, masks)
+
             loss.backward()
             optimizer.step()
 
@@ -102,7 +119,8 @@ def main():
                 images = images.to(DEVICE, dtype=torch.float32)
                 masks = masks.to(DEVICE, dtype=torch.float32)
                 outputs = model(images)
-                loss = bce_loss(outputs, masks)
+                loss = criterion(outputs, masks)
+
 
                 val_loss += loss.item()
                 val_dice += dice_coefficient(outputs, masks)
